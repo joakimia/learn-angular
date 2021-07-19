@@ -1,0 +1,8 @@
+.flex-container {
+  display: flex;
+}
+
+label {
+  display: block;
+  text-align: center;
+}

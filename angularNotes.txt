@@ -1,0 +1,445 @@
+Simple Remove = this.ingredients.splice(index, 1);
+
+Angular lanserer en ny versjon hver 6 måned ca.
+
+Angular enabler oss til å mixe statisk og dynamisk kode.
+
+{{ variableName }} = data binding / string interpolation
+    - Hvordan man output'er data til DOM / reagerer på user events.
+    - Godtar string variabler (funksjoner må returnere string), eller variabler som kan konverteres til en string (number).
+
+[property]="value" one-way Property binding. (Assigne HTML attribute, med data/JavaScript objekt med logikk)
+
+[(ngModel)]="variableName" = two-way binding
+    - Forteller Angular til å lytte på hva du legger inn, og lagre det i variabel navnet.
+    - Må importere FormsModule (TypeScript feature), selv om ngModel er built-in i Angular.
+    - Dette fordi TypeScript må vite hvor ting er.
+
+(event)="expression" = event binding.
+
+Konvertere fra string til number, bruk const toInt = +string; 
+
+($event) = Reserved variabel navn, som brukes i template.
+    - Brukes til å sende med event data til en funksjon, når event er invoked.   
+
+Et interface er en kontrakt. Hvis noen importerer interfacet, må klassen implementere funksjonaliteten.
+    - Interfacet definerer funksjoner, og hva de returnerer.
+
+Ved å bruke static, slipper man å instantiate (skrive new Class) for å bruke funksjoner.
+
+TypeScript er et superset av JavaScript, som tilbyr flere features enn JavaScript (Types, Classes, Interfaces).
+    - Kjøres ikke i browseren, blir kompilert til JavaScript.
+
+Decorators er en TypeScript feature som lar oss "enhance" JavaScript klasser.
+    - alltid lagt til med å legge til et "@" tegn.
+    - Må sende inn et JavaScript objekt til å konfigurere Decorator'n.
+    - Selector = må være en string, og unik (optional).
+    - templateUrl = Ektern HTML-fil, trenger en relativ path til filen (required).
+    - styleUrls = css styling (optional).
+
+Angular bruker komponenter, og moduler til å bundle forskjellige deler/funksjonalitet inn i pakker. 
+    - Som f.eks app.module.ts. Bruker en tom klasse.
+    - bootstrap = hvilke komponenter må Angular være klar over, når applikasjonen starter.
+    - By default vil ikke Angular scanne alle filene (kan ikke bare lage filen), må registrere den i NgModule.
+
+Man kan lage komponenter fra CLI.
+    - ng g c <name>
+    - Da vil app.module.ts oppdateres automatisk.
+
+Man kan bruke inline HTML/CSS istedenfor å bruke en fil, i templateUrl/stylesUrl.
+    - Da endrer man fra "templateUrl" til "template", eller "stylesUrl" til "styles" en av dem MÅ være tilstede.
+    - Man kan endre fra ' til " for å skrive HTML over flere linjer.
+
+Selectors kan enten være en string med navnet til komponenten, eller bruke det som en attribute.
+    - selector: "app-root", da bruker man <app-root> </app-root>.
+    - selector: "[app-root]" / ".app-root", da bruker man <div app-root> </div>, eller <div class=app-root> </div>(Dette stammer fra CSS).
+
+Type casting må bruke "as".
+    - (event.target as HTMLInputElement).value;
+
+Modules er klasser som definerer type objekter.
+    - Brukes hvis man trenger et objekt som blir ofte brukt.
+    - Vanlige klasser, bruker ikke Decorator.
+
+DIRECTIVES er instruksjoner som brukes i DOM'en, brukes til definere egne attributes til elements.
+    - Kompomenter er en type directive.
+    - [directive]="{JavaScript Object}"
+    - directive="string"
+    - <p appTurnGreen> This is a green background </p> (appTurnGreen er directive).
+    - ngIf er conditional directive som kommer med Angular.
+    - lages i egne filer: file-name.directive.ts
+    - Trenger Decorator @Directive, fra angular core:
+    - @Directive({
+        selector: '[appBasicHighlight]', / appBasicHighlight
+      })
+      export class BasicHighlighDirective {}
+    - Må importeres til app.module.
+    - Da kan man f.eks endre styling, i ngOnInit:
+    - this.elementRef.nativeElement.style.backgroundColor = 'green';
+    - Husk constructor:   constructor(private elementRef: ElementRef) {}
+    - NB! Dette er ikke best-practive, lag directive med: ng g d <name>.
+    - Bruk Renderer: constructor(private renderer: Renderer2) { }, og OnInit.
+    - @Directive({
+            selector: '[appBetterHighlight]'
+      })
+      export class BetterHighlightDirective implements OnInit {
+         constructor(private elRef: ElementRef, private renderer: Renderer2) {}
+
+        ngOnInit() {
+            this.renderer.setStyle(this.elRef.nativeElement, 'background-color', 'blue');
+        }
+      }
+    - Ved å bruke denne metoden, får du tilgang til serviceWorkers (siden angular trenger ikkke DOM'n).
+
+
+For å bruke HostBinding og Hostlistener:
+@Directive({
+  selector: '[appDropDown]'
+})
+export class DropDownDirective {
+  @HostBinding('class.open') isOpen = false;
+
+  @HostListener('click') onToggle() {
+    this.isOpen = !this.isOpen;
+  }
+}
+
+For å gjøre noe enkelt som å BARE endre bakgrunnen, kan man bruke HostBinding - til elementet som bruker directive'n.
+- @HostBinding('style.backgroundColor') backgroundColor = 'transparent';
+- Da skriver man:
+- @HostListener('mouseenter') mouseover(eventData: Event) {
+    this.backgroundColor = 'blue';
+  }
+- Man kan override styling med: <p appBetterHighlight [defaultColor]="'yellow'" [highlightColor]="'red'">
+- Da må man bruke Input():
+-  @Input() defaultColor = 'transparent';
+  @Input() highlightColor = 'blue';
+  @HostBinding('style.backgroundColor') backgroundColor = this.defaultColor;
+
+- ngOnInit() {
+    this.backgroundColor = this.defaultColor;
+}
+
+ngIf må brukes med *, siden det er en "structural" directive 
+    - Den forandrer strukturen til DOM'n, (enten adder den noe til DOM'n, eller ikkke)
+    - built-in directives bruker prefix "ng".
+    - NB! Man kan ikke ha flere enn 1 structural directive på et element.
+
+I motsetning finnes det "attribute" directives.
+    - Man fjerner aldri et elemtn i DOM'n med denne.
+    - Man bare endrer komponenten, eller stylingen.
+    
+Local reference # brukes som en else condition til If.
+    - *ngIf="boolean; else localReferenceString".
+    - <ng-template #localReferenceString> <p> some else html tag </p> </ng-template> 
+
+[ngSwitch]="value" er en switch case som assignes til en container, brukes hvis det er mange *ngIfs:
+    <div [ngSwitch]="value">
+        <p *ngSwitch="5"> Value is 5 </p>
+        <p *ngSwitch="2"> Value is 2 </p>
+        <p *ngSwitchDefault> Value is default </p>
+    </div>
+
+ngStyle gir en HTML tag conditional styling.
+    - Må bruke property binding [ngStyle].
+    - assignes til et JavaScript objekt.
+    - [ngStyle] = {backgroundColor: getColor()}
+
+ngClass adder/remover className til HTML tag.
+    - [ngClass]="{ className: condition' }"
+    - gir elementet "className" hvis condition blir true
+
+*ngFor looper igjennom en array.
+    - er en structural directive (bruker *)
+    - *ngFor="let var of array"
+
+Komponenter som vil lytte på data som blir sendt fra andre komponenter må bruke @Input.
+    - By default, er alle properties private.
+    - Man må importere @Input decorator, fra angular/core,
+
+For å sende data til andre komponenter, bruker man angular/core sin EventEmitter.
+    - (IKKE RECOMMENDED, BRUK SUBJECTS -> MER EFFICIENT)
+    - <Component [property] />
+    - @Output() variable = new EventEmitter<type>();
+    - Husk å importere både EventEmitter, og Output decorator, for å sende data ut fra komponent.
+    - Husk å bruke "<>" (generisk type), og definer typen. Til sist kaller man på konstruktør "()"
+
+Ved å importere ViewChild('localReferenceString' / ComponentType) fra angular/core.
+    - Får man tilgang til lokale komponenten, eller elementet som har denne referansen.
+    - Dette er en ElementRef type, som lar deg bruke .nativeElement.value
+    - @ViewChild('localReferenceString', { static: false }) variableName: ElementRef;.
+    - (BRUK STRING interpolation / Property Binding - ikke dette).
+
+Ved å importere ContentChild('localReferenceString / Komponent) får man tilgang til Content til HTML.
+    - Ikke det samme som ViewCihld (Se også naming av LifeCycle under. )
+
+<ng-content> gjør at du kan render'e HTML inne som children, til andre komponenter.
+
+ngOnChanges.
+    - Kalles hver gang en komponent sin bundede Input property forandres.
+
+ngOnInit er en av lifecycle hooks'ene.
+    - Kalles når en komponent blir initialisert
+
+ngDoCheck.
+    - Kalles hver gang change detection kjøres innenfor en komponent (ikke så veeldig intensive).
+
+ngAfterContentInit
+    - Kalles hver gang <ng-content> har mottatt HTML-tags fra parent komponent.
+
+ngAfterContentChecked
+    - Kalles hver gang projected HTML har blitt sjekket.
+
+ngAfterViewInit.
+    - Kalles hver gang komponentens View (og children's view) har blitt initalisert.
+
+ngAfterViewChecked.
+    - Kalles hver gang view (og children's view) har blitt sjekket.
+
+ngOnDestroy
+    - Kalles hver gang komponenten er i ferd med å bli fjernet.
+
+SERVICES (som redux) kan sende data/funksjoner  til/fra komponenter, istedenfor property/event binding.
+    - Slipper å bruke Input / Output over store distanser.
+    - Kan sentraliserer logging.
+    - NB! Ikke instantiate services manuelt, Angular kan hjelpe.
+    - Dette gjøres ved å bruke constructor, og add'e providers til selector:
+    - providers: [service],
+    - constructor(private service: ServiceClassName) {}
+    - Da vil den samme instancen av servicen bli tilgjengelig for alle child komponents (AppModule er top level)
+    - Dette tillater ulike instanser av den samme servicen.
+    - Man kan injecte services, inn til andre services. Ved å bruke @Injectable.
+    - NB! Husk å subscribe() / emit(). f.eks:
+    - skal du legge til noe, må du ha med en EventEmitter. og emit'e dette:
+    - shoppingListUpdated = new EventEmitter<Ingredient[]>();
+    - this.ingredients.push(new Ingredient(name, amount));
+    - this.shoppingListUpdated.emit(this.ingredients.slice());
+    - Og i ngOnInit - subscribe:
+    - this.ingredients = this.shoppingListService.getIngredients();
+    - this.shoppingListService.shoppingListUpdated.subscribe(
+       (ingredients: Ingredient[]) => (this.ingredients = ingredients)
+    - );
+
+ANGULAR-ROUTER legges til i AppModule, importeres fra angular/router.
+    - const appRoutes: Routes = [ { path: 'users', component: UsersComponent } ];
+    - legg til RouterModule.forRoot(appRoutes) i imports array.
+    - i HTML fil <router-outlet></router-outlet> markerer hvor currently selected route skal renderes
+    - på HTML tags, bruk "/" : <a routerLink="/servers">Reload Page</a> for relativ Paths. "./" legg til current path, "../" gå opp.
+    - routerLinkActive="activeClassName" er en Angular built-in directive som endrer css active styling.
+    - NB! basert på routerLink string.
+    - Husk [routerLinkActiveOptions]="{exact: true}" for root / exact routerLinkString.
+    - ##NAVIGATE WITH CLICK LISTENERS##: 
+    - NB! husk å injecte router constructor(private router: Router) {} NAVIGERING/REDIRECTING
+    - I click fn(): this.router.navigate(['/servers']);
+    - NB! this.router.navigate fn vet ikke hvilken rute du er på. (Current activated route)
+    - Da må du bruke en parameter til this.router.navigate([], {relativeTo: this.route })
+    - relativeTo er fint for å gå videre inn i samme komponent.
+    - Og du må injecte private route: ActivatedRoute i constructor() INFORMASJON OM RUTE
+    - for å legge til parametere til links, bruke /:param ({ path: 'user/:id/:name', component: UserComponent })
+    - I komponenten, etter å ha injected ActivatedRoute i constructor():
+    - ngOnInit() {  ##SUBSCRIBE TO CHANGES WITHIN THE SAME COMPONENT ## 
+        this.paramsSubscription = this.route.params.subscribe((params: Params) => {
+            this.user.id = params['id'];
+            this.user.name = params['name'];
+        });
+    - For å legge til path rekursivt, er det best å bruke [routerLink]="['/user', 10, 'Anna']" ## NB! Relative! ##
+    - By default, vil ikke komponenten reloade den samme komponenten, men da må man bruke subscribe i ngOnInit:
+    - NB! Husk å implementere ngOnDestroy, ved å importere Subscription fra rxjs:
+    - ngOnDestroy() {
+        this.paramsSubscription.unsubscribe();
+      }
+    - for å legge til query parametere, kan man legge til directive [queryParams]="{ allowEdit: '1' }"
+    - for å legge til # (fragment), legg til directive fragment="loading".
+    - Skal man gjøre det via typescript, kan man sende med parametere, etter å injecte private router: Router:
+    - onLoadServer(id: number) {
+        this.router.navigate(['/servers', id, 'edit'], {
+            queryParams: { allowEdit: '1' },
+            fragment: 'loading'
+        });
+    - ved å legge til queryParamsHandling: 'preserve , i {relativeTo } objektet, kan man persiste params
+    - i ngOnInit kan man subscribe til endringer ved å injected ActivatedRoute og:
+    - this.route.queryParams.subscribe();
+    - this.route.fragment.subscribe();
+    - for å legge til nested routes bruker man children property i appRoutes:
+    -  path: 'servers',
+        component: ServersComponent,
+        children: [
+        { path: ':id/edit', component: EditServerComponent },
+        { path: ':id', component: ServerComponent }
+    ] NB! HUSK EMPTY CHILDREN PATH = path: ''
+    NB! HUSK REKKEFØLGE PÅ CHILDREN!!
+    - man kan redirecte "Page Not Found" ved å utvide routes:
+    - {path: 'not-found', component: ErrorPageComponent }
+    - {path: '**', redirectTo: ErrorPageComponent, pathMatch: 'full } NB! DENNE MÅ VÆRE NEDERST!
+    - Man kan legge til data: { message: 'Page not found' } som ErrorPageComponent kan bruke
+    - NB! routePath bør være egen app-routing.module.ts Med en egen class AppRoutingModule
+    - Huske  og @NgModule({ imports: [RouterModule.forRoot], exports: [RouterModule] })
+    - I appp.module så importerer man da AppRoutingModule.
+    - RouteGuard er funksjonalitet som utføres før en ny rute blir utført (f.eks kun hvis bruker er logget inn).
+    - f.eks canActivate vil beskytte noen ruter. Ofte legget til i en auth-guard.service.ts
+    - export class AuthGuard implements CanActivate {}.
+    - canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {} fra @angular/router
+    - returnerer en Observable<boolean> | Promise<boolean> | boolean
+    - Fordi noen guards utføres kun på klient siden (sync eller async).
+    - I tillegg har man en helper service i auth.service.ts
+    - For å bruke guarden, må man legge til canActivate: [AuthGuard] property til path objektet
+    - i app.module, må man da legge til AuthGuard og AuthService i providers: []
+    - AuthGuard kan implementere CanActivateChild for å gjøre det samme for children's path.
+    - For å logge inn, må man injecte AuthService i komponenten.
+    - expot class CanDeactivateGuard implements CanDeactivate<EGENDEFINERT INTERFACE> {}
+    - appRoutes objekter må da ha med canDeactivate: [CanDeactivateGuard] property.
+    - Og i app.module må providers: [CanDeactivateGuard].
+    - komponenten må da implementere CanDeactivateGuard metoder (fordi det har en kontrakt med interfacet)
+    - Man kan ha en egen server-resolver.service.ts som implementer Resolve fra angular:
+    - export class ServerResolver implements Resolve<{id: number, name: string, status: string}> {}
+    - må implemente resolve (route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<>
+    - Observable'n returnerer <Server> | Promise<Server> | Server {}
+    - i path'n (app-routing.module.ts) må man da legge til en resolve: {ServerResolver} property
+    - NB! SERVER MÅ KONFIGURERES SLIK AT 404 ERRORS RETURNERER INDEX.HTML filen (fordi serveren parser filbanen først).
+    - På denne måten, vil angular håndtere dette, og ikke serveren.
+    - På gamle systemer må man kanskje gjøre dette via # tegnet.
+    - i app-routing.module.ts sin @NgModule({ imports: [ RouterModule.forRoot(approutes, { useHash: true })]})
+    - Da vil webserveren ignorere filbanen som er etter # tegnet.
+    - 
+
+OBSERVABLES er en tredje parts bibliotek som lar deg jobbbe med async oppgaver.
+Det er i essens en data pakke, som følger et pattern.
+Vvi har Observable, og en Observer. I mellom har vi en stream med events.
+    - .subscribe() er Observer. 3 måter å behandler data pakker (Handle Data, Handle Error, Handle Completion).
+    - en construct for å lytte på forandringer i data streamen.
+    - callback inne i subscribe blir utført hver gang det du subscriber på endrer seg.
+
+import { Subscription, Observable } from 'rxjs';
+    - Observable importeres fra rxjs, egendefinerte må Subscribes til.
+    - Observables vil nødvendigvis ikke stoppe å emit'e, selv om du redirecter til en annen komponent.
+    - Derfor er det viktig å unsubscribe();
+    - const customIntervalObservable = Observable.create(observer => {});
+    - observer (input param), er delen som er interessert i ny data, errors, eller job complete i streamen.
+    - ## OBSERVER.NEXT() ##
+    - const customIntervalObservable = Observable.create(observer => {
+        setInterval(() => { 
+            observer.next() informerer observeren. / observer.error() sier ifra om feil / obserber.complete()
+            }, 1000);
+        });
+    - customIntervalObservable.subscribe(data => { // doSomething }); vil være observatøren.
+    - ## OBSERVER.ERROR() ##
+    - håndteres inne i Observable.create(); Stopper observable'n (Den fortsetter ikke mot .complete())
+    - observer.error(new Error('count is greater than 3'));
+    - Man kan sende inn parameter nr. 2 i subscribe(); som håndterer feilen.
+    - customIntervalObservable.subscribe(data => {}, error => {});
+    - ## OBSERVER.COMPLETE() ## (Når serveren svarer med en response f.eks)
+    - stopper kode eksekvering.
+    - Man kan legge til param nr 3. i subscribe(); for completion
+    - customIntervalObservable.subscribe(data => {}, error => {}, () => {});
+
+OPERATORS brukes når man ikke trenger all raw data, men ønsker å transformere noe av det.
+    - customIntervalObservable.pipe(map(data => { //do something; return data; }));
+    - Dette forandrer IKKE data'en inne i observable'n. Må bruke OPERATOR -> SUBSCRIBE.
+    - Man kan putte flere funksjoner inne i pipe(filter(), map());
+
+SUBJECT (RECOMMENDED, IKKE EVENTEMITTER) kan erstatte services som bruker EventEmitter til å kommunisere på tvers av komponenter.
+    - på samme måte som EventEmitter, men importere: import { Subject } from 'rxjs';
+    - activatedSubject = new Subject<boolean>();
+    - Istedenfor .emit(), bruker man activatedSubject.next().
+    - Observers er passive (man wrapper en callback/event inn den)
+    - Subject er mer aktiv som man kan subscribe() til, man kan aktivt kalle .next() fra utsiden. (kan trigges av oss fra koden)
+    - NB! HUSK UNSUBSCRIBE!
+
+FORMS (TEMPLATE-DRIVEN/REACTIVE) er laget for å submite input til en server. Men dette må angular håndtere pga. det er en single-page application.
+    - Angular gir deg en måte for å lage et JavaScript objekt til å forme user inputs til forms (value, validEmail etc.)
+    - ingen directives på <form> betyr at data ikke blir sendt til server når "Submit" knappen blir trykket på.
+    - TEMPLATE-DRIVEN (Alt du gjør, gjør du i template'n): Setter opp forms i HTML, og Angular styrer struktur og logikk bak Form objektet.
+    - Template-driven trenger import { FormsModule } from '@angular/forms'; Da vil Angular lete etter en <form> tag.
+    - Vi må fortelle Angular, "hva slags controls vil vi bruke inne i <form>", ved å legge til <input ngModel />.
+    - Da vil verdien bli med inn i JavaScript objektet. keyValue defineres med "name" directive: <input name="username" />
+    - onSubmit(form: NgForm) {} funksjonen plasseres ved <form (ngSubmit)="onSubmit(f)" #f="ngForm"> (IKKE VED <button type="submit")
+    - Dette gir oss tilgang til JavaScript objektet som Angular lager (husk: import { NgForm } from '@angular/forms').
+    - Man kan også bruke @ViewChild('f', { static: false }) signupForm: NgForm;
+    - Hvis man bruker <input required /> directive f.eks, vil Angular ta høyde for dette og endre "valid" property.
+    - For å aktivere HTML5 validators, må man bruke ngNativeValidate.
+    - Ved å bruke property binding med form kan man legge til styling: <button [disabled]="!f.valid">
+    - CSS kan da f.eks se ut som: input.ng-invalid.ng-touched { border: 1px solid red; }
+    - VALIDATOR med localReference og ngIf: <input ngModel #email="ngModel" />
+    - BUILT-IN Validator (number): [pattern]="'^[1-9]+[0-9]*$'"
+    - <span *ngIf="!email.valid && email.touched">
+    - [ngModel]="variable" (one-way property binding) vil gi et HTML-objekt en default value.
+    - Man kan også bruke two-way binding [(ngModel)]="variable, (Husk å deklarere variable i typescript fil).
+    - ngModelGroup="keyValue" vil grupere og lage et nested objekt i "value", og #userData="ngModelGroup" for å få tilgang.
+    - this.signupForm.form.patchValue({}) = endrer deler av form. this.signupForm.setValue({}) må SETTE ALT.
+    - this.signupForm.reset(); vil resette alt, (setValue() kan fungere som custom-reset )
+    - REACTIVE: Vi definerer forms og strukturen på objektet, slik at man kan "fine tune" logikk og funksjonalitet.
+    - controls er basically { 'key': value } pairs
+    - brukes gjennom import { FormGroup, FormControl, Validators } from '@angular/forms'; 
+    - Og i app.module.ts sin imports = import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+    - Husk å initialisere signupForm: FormGroup i ngOnInit() { this.signupForm = new FormGroup({ 'username': new FormControl(initialValue, Validators.requried)}); }
+    - Reactive må overwrite default angular behavior med <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+    - I .ts filen, har vi da tilgang via this.signupForm
+    - i HTML-elementer, skriver man: <input formControlName="keyVariable" />
+    - VALIDATORS ER ANNERLEDES I REACTIVE (Man konfigurerer ikke i HTML, bare synkroniserer), Validation skjer i typescript.
+    - NB! Ikke utfør validators, bare referer til dem.
+    - For å få tilgang til validators bruker man .get('key') slik:
+    - <span *ngIf="!signupForm.get('username').valid && signupForm.get('username').touched" class="help-block">Please enter a valid username!</span>
+    - Man kan ha nested formGroup:
+    - this.signupForm = new FormGroup({
+        'userData': new FormGroup({
+            'username': new FormControl(null, Validators.required),
+            'email': new FormControl(null, Validators.required),
+        }),
+        'gender': new FormControl('male')
+    });
+    - Da må man wrappe HTML elementer slik at det speiler typescript. med <div formGroupName>
+    - NB! Husk å oppdatere .get() med "."
+    - For å legge til en key med array, import { FormArray } from '@angular/forms';
+    - og this.signUpForm = new FormGroup({
+        hobbies: new FormArray([]);
+    })
+    - Hvis array er av type objekt, loop over array og bruk:
+    - hobbies.push(
+            new FormGroup({
+              name: new FormControl(arrayMember.name),
+              description: new FormControl(arrayMember.description)
+            });
+    - Hvis array er ikke av type objekt, bruk new FormControl (istedenfor å wrappe i FormGroup).
+    - NB! i HTML-fil, Husk å wrappe  <div formArrayName="hobbies" /> og speile typescript form.
+    - I samme div wrapper som looper: 
+        <div *ngFor="let ingredient of ingredients; let i = index" [formGroupName]="i" />
+    - Custom Validator er en funksjon som blir automatisk utført når form-control'en blir forandret.
+    - Hvis validering er true, må man returnere null/ ikke returnere noe:
+    - forbiddenNames(control: FormControl): {[s: string]: boolean} {
+        if (this.forbiddenUsernames.indexOf(control.value) !== -1) {
+            return { 'nameIsForbidden': true};
+        }
+        return null;
+     }
+    - Pass på og bind(this) (Angular som kaller på this, ikke vår kode):
+    - username: new FormControl(null, [
+          Validators.required,
+          this.forbiddenNames.bind(this)
+        ]),
+    - Custom Validator sine error codes kommer i errors property.
+    - Man kan da accesse via HTML slik: <span *ngIf="signupForm.get('userData.username').errors['nameIsForbidden']">
+    - async Validation:
+    -   forbiddenEmails(control: FormControl): Promise<any> | Observable<any> {
+            const promise = new Promise<any>((resolve, reject) => {
+                setTimeout(() => {
+                    if (control.value === 'test@test.com') {
+                        resolve({ emailIsForBidden: true });
+                    } else {
+                        resolve(null);
+                    }
+                }, 1500);
+            });
+        return promise;
+        }
+    - Man kan tracke en generell form state via observables:
+    - this.signupForm.valueChanges.subscribe(value => console.log(value));
+    - this.signupForm.setValue({}) og this.signupForm.patchValue({}) og this.signupForm.reset({}) fungerer.
+    - UPDATING SERVICE (ADDING), bruk form.value:
+    -     this.editMode
+      ? this.recipeService.updateRecipe(this.id, this.recipeForm.value)
+      : this.recipeService.addRecipe(this.recipeForm.value);
+
+
+
+TODO: 
+    - Add reactive driven form to the new-recipe.component.
